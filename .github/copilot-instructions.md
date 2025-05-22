@@ -20,7 +20,7 @@ feature or responsibility.
 - **Use clear, consistent imports** (prefer relative imports
 within packages).
 ### 🧪 Testing & Reliability
-- **Always create Pytest unit tests for new features**
+- **Always create  unit tests for new features**
 (functions, classes, routes, etc).
 - **After updating any logic**, check whether existing unit tests
 need to be updated. If so, do it.
