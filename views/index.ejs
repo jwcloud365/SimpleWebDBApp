@@ -1,49 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Simple Picture Database</h1>
-            <nav>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/upload">Upload</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-    
-    <main class="container">
+<%- include('./partials/header', { title: title, mainClass: 'home-page' }) %>
+    <%- include('./partials/messages') %>
         <section class="welcome">
             <h2>Welcome to Your Picture Database</h2>
             <p>A simple way to store and organize your pictures.</p>
         </section>
-        
+          
         <section class="gallery">
-            <h2>Gallery</h2>
-            <p>Your pictures will appear here once uploaded.</p>
-            <div class="picture-grid">
-                <!-- Pictures will be displayed here -->
+            <div class="gallery-header">
+                <h2>Your Picture Gallery</h2>
+                <a href="/upload" class="btn btn-primary" aria-label="Upload new picture" tabindex="0">Upload New</a>
+            </div>
+            
+            <% if (pictures && pictures.length > 0) { %>
+                <div class="picture-grid" id="pictureGrid">
+                    <% pictures.forEach(function(picture) { %>
+                        <div class="picture-card" data-id="<%= picture.id %>">
+                            <div class="picture-thumbnail">
+                                <a href="/pictures/<%= picture.id %>" aria-label="View details for <%= picture.original_name %>" tabindex="0">
+                                    <img src="/api/pictures/<%= picture.id %>/thumbnail" alt="<%= picture.description || picture.original_name %>">
+                                </a>
+                            </div>
+                            <div class="picture-info">
+                                <h3 class="picture-title"><%= picture.original_name %></h3>
+                                <p class="picture-date"><%= new Date(picture.upload_date).toLocaleDateString() %></p>
+                                <div class="picture-actions">
+                                    <a href="/pictures/<%= picture.id %>" class="btn btn-sm btn-secondary" aria-label="View details" tabindex="0">View</a>
+                                    <button class="btn btn-sm btn-danger delete-btn" data-id="<%= picture.id %>" aria-label="Delete picture" tabindex="0">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+                
+                <% if (pagination && pagination.totalPages > 1) { %>
+                    <div class="pagination">
+                        <% if (pagination.currentPage > 1) { %>
+                            <a href="/?page=<%= pagination.currentPage - 1 %>" class="pagination-link" aria-label="Previous page" tabindex="0">&laquo; Previous</a>
+                        <% } %>
+                        
+                        <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                            <a href="/?page=<%= i %>" class="pagination-link <%= pagination.currentPage === i ? 'active' : '' %>" aria-label="Page <%= i %>" aria-current="<%= pagination.currentPage === i ? 'page' : 'false' %>" tabindex="0"><%= i %></a>
+                        <% } %>
+                        
+                        <% if (pagination.currentPage < pagination.totalPages) { %>
+                            <a href="/?page=<%= pagination.currentPage + 1 %>" class="pagination-link" aria-label="Next page" tabindex="0">Next &raquo;</a>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } else { %>
                 <div class="empty-state">
                     <p>No pictures yet. Start by uploading one!</p>
-                    <a href="/upload" class="btn">Upload Picture</a>
+                    <a href="/upload" class="btn btn-primary" aria-label="Upload new picture" tabindex="0">Upload Picture</a>
+                </div>
+            <% } %>
+        </section>
+        
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="deleteModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Deletion</h3>
+                    <button class="modal-close" id="closeModalBtn" aria-label="Close modal" tabindex="0">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this picture?</p>
+                    <p class="warning">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="confirmDeleteBtn" aria-label="Confirm delete picture" tabindex="0">Delete</button>
+                    <button class="btn btn-secondary" id="cancelDeleteBtn" aria-label="Cancel deletion" tabindex="0">Cancel</button>
                 </div>
             </div>
-        </section>
-    </main>
-    
-    <footer>
-        <div class="container">
-            <p>&copy; <%= new Date().getFullYear() %> Simple Picture Database</p>
         </div>
-    </footer>
+</section>
 
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('./partials/footer') %>

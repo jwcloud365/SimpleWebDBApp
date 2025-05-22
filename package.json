@@ -7,10 +7,15 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "jest --watchAll",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "jest tests/e2e --forceExit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "db:init": "node database/init.js",
-    "db:seed": "node database/seed.js"
+    "db:seed": "node database/seed.js",
+    "db:backup": "node scripts/backup-db.js create",
+    "db:backup:list": "node scripts/backup-db.js list",
+    "db:backup:restore": "node scripts/backup-db.js restore"
   },
   "keywords": [],
   "author": "",

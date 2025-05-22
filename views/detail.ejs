@@ -1,0 +1,89 @@
+<%- include('./partials/header', { title: picture ? `Picture: ${picture.original_name}` : 'Picture Details', mainClass: 'detail-page' }) %>
+    <%- include('./partials/messages') %>
+    
+    <% if (picture) { %>
+        <section class="picture-detail">
+            <div class="detail-header">
+                <h2>Picture Details</h2>
+                <div class="detail-actions">
+                    <button class="btn btn-secondary edit-btn" id="editBtn" aria-label="Edit picture details" tabindex="0">
+                        Edit
+                    </button>
+                    <button class="btn btn-danger delete-btn" id="deleteBtn" aria-label="Delete this picture" tabindex="0">
+                        Delete
+                    </button>
+                </div>
+            </div>
+            
+            <div class="detail-content">
+                <div class="picture-container">
+                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_name %>" class="detail-image">
+                </div>
+                
+                <div class="picture-info">
+                    <div class="info-group">
+                        <h3>File Information</h3>
+                        <ul class="info-list">
+                            <li><strong>Original Name:</strong> <%= picture.original_name %></li>
+                            <li><strong>File Size:</strong> <%= (picture.file_size / 1024).toFixed(2) %> KB</li>
+                            <li><strong>Type:</strong> <%= picture.mime_type %></li>
+                            <li><strong>Uploaded:</strong> <%= new Date(picture.upload_date).toLocaleString() %></li>
+                            <% if (picture.updated_date) { %>
+                                <li><strong>Last Updated:</strong> <%= new Date(picture.updated_date).toLocaleString() %></li>
+                            <% } %>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-group">
+                        <h3>Description</h3>
+                        <div class="description-display" id="descriptionDisplay">
+                            <% if (picture.description) { %>
+                                <p><%= picture.description %></p>
+                            <% } else { %>
+                                <p class="no-description">No description provided</p>
+                            <% } %>
+                        </div>
+                        
+                        <div class="edit-form hidden" id="editForm">
+                            <form id="updateForm">
+                                <div class="form-group">
+                                    <label for="editDescription" class="form-label">Edit Description</label>
+                                    <textarea id="editDescription" class="form-control" rows="4"><%= picture.description || '' %></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary save-btn">Save Changes</button>
+                                    <button type="button" class="btn btn-secondary cancel-btn" id="cancelEditBtn">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="deleteModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Deletion</h3>
+                    <button class="modal-close" id="closeModalBtn" aria-label="Close modal" tabindex="0">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this picture?</p>
+                    <p class="warning">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="confirmDeleteBtn" aria-label="Confirm delete picture" tabindex="0">Delete</button>
+                    <button class="btn btn-secondary" id="cancelDeleteBtn" aria-label="Cancel deletion" tabindex="0">Cancel</button>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="not-found">
+            <h2>Picture Not Found</h2>
+            <p>The requested picture could not be found.</p>
+            <a href="/" class="btn btn-primary">Return to Gallery</a>
+        </div>
+    <% } %>
+
+<%- include('./partials/footer', { scripts: ['/js/detail.js'] }) %>

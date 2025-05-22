@@ -29,16 +29,16 @@ app.set('views', path.join(__dirname, '../views'));
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Home route
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Simple Picture Database' });
-});
+// Routes will be added by our route handlers
 
 // API routes will be added later
 // app.use('/api/pictures', require('./routes/pictures'));
 
 // API routes
 app.use('/api/pictures', require('./routes/pictures'));
+
+// Frontend routes
+app.use('/', require('./routes/pages'));
 
 // Error handling middleware
 app.use((req, res, next) => {

@@ -1,0 +1,20 @@
+<% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+    <div class="alert alert-success" role="alert">
+        <%= success %>
+        <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+    </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+    <div class="alert alert-error" role="alert">
+        <%= error %>
+        <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+    </div>
+<% } %>
+
+<% if (typeof info !== 'undefined' && info && info.length > 0) { %>
+    <div class="alert alert-info" role="alert">
+        <%= info %>
+        <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+    </div>
+<% } %>
