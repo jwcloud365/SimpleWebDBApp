@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Simple Picture Database</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/upload">Upload</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section class="welcome">
+            <h2>Welcome to Your Picture Database</h2>
+            <p>A simple way to store and organize your pictures.</p>
+        </section>
+        
+        <section class="gallery">
+            <h2>Gallery</h2>
+            <p>Your pictures will appear here once uploaded.</p>
+            <div class="picture-grid">
+                <!-- Pictures will be displayed here -->
+                <div class="empty-state">
+                    <p>No pictures yet. Start by uploading one!</p>
+                    <a href="/upload" class="btn">Upload Picture</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; <%= new Date().getFullYear() %> Simple Picture Database</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
