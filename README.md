@@ -31,6 +31,10 @@ This application provides a streamlined way to manage your picture collection wi
 ### Installation
 
 1. Clone this repository
+   ```
+   git clone https://github.com/jwcloud365/SimpleWebDBApp.git
+   cd SimpleWebDBApp
+   ```
 2. Install dependencies:
    ```
    npm install
