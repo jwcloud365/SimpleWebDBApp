@@ -23,3 +23,5 @@ All notable changes to this project will be documented in this file.
 - Image processing with Sharp for thumbnails
 - Complete API endpoints for pictures management
 - Input validation and sanitization middleware
+- GitHub repository creation and initial push
+- MIT License added
