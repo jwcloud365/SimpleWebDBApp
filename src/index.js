@@ -10,13 +10,22 @@ const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
+const fs = require('fs');
 
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"]
+    }
+  }
+})); // Security headers with CSP configured for styles
 app.use(cors()); // Enable CORS
 app.use(morgan('dev')); // Logging
 app.use(express.json()); // Parse JSON bodies
@@ -28,6 +37,12 @@ app.set('views', path.join(__dirname, '../views'));
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Make sure uploads directory exists and is accessible
+const uploadsPath = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
 
 // Routes will be added by our route handlers
 

@@ -1,4 +1,4 @@
-<%- include('./partials/header', { title: picture ? `Picture: ${picture.original_name}` : 'Picture Details', mainClass: 'detail-page' }) %>
+<%- include('./partials/header', { title: picture ? `Picture: ${picture.original_filename}` : 'Picture Details', mainClass: 'detail-page' }) %>
     <%- include('./partials/messages') %>
     
     <% if (picture) { %>
@@ -14,22 +14,35 @@
                     </button>
                 </div>
             </div>
-            
-            <div class="detail-content">
+              <div class="detail-content">
                 <div class="picture-container">
-                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_name %>" class="detail-image">
+                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_filename %>" class="detail-image">
+                    
+                    <% if (picture.thumbnails && picture.thumbnails.length > 0) { %>
+                        <div class="thumbnails-container">
+                            <h4>Thumbnails</h4>
+                            <div class="thumbnails-list">
+                                <% picture.thumbnails.forEach(function(thumb) { %>
+                                    <div class="thumbnail-item">
+                                        <img src="/uploads/<%= thumb.filename %>" alt="Thumbnail" class="thumbnail-image">
+                                        <span class="thumbnail-info"><%= thumb.width %>x<%= thumb.height %></span>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                    <% } %>
                 </div>
                 
                 <div class="picture-info">
                     <div class="info-group">
                         <h3>File Information</h3>
                         <ul class="info-list">
-                            <li><strong>Original Name:</strong> <%= picture.original_name %></li>
-                            <li><strong>File Size:</strong> <%= (picture.file_size / 1024).toFixed(2) %> KB</li>
-                            <li><strong>Type:</strong> <%= picture.mime_type %></li>
-                            <li><strong>Uploaded:</strong> <%= new Date(picture.upload_date).toLocaleString() %></li>
-                            <% if (picture.updated_date) { %>
-                                <li><strong>Last Updated:</strong> <%= new Date(picture.updated_date).toLocaleString() %></li>
+                            <li><strong>Original Name:</strong> <%= picture.original_filename %></li>
+                            <li><strong>File Size:</strong> <%= (picture.size / 1024).toFixed(2) %> KB</li>
+                            <li><strong>Type:</strong> <%= picture.mimetype %></li>
+                            <li><strong>Uploaded:</strong> <%= new Date(picture.created_at).toLocaleString() %></li>
+                            <% if (picture.updated_at) { %>
+                                <li><strong>Last Updated:</strong> <%= new Date(picture.updated_at).toLocaleString() %></li>
                             <% } %>
                         </ul>
                     </div>

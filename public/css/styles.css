@@ -331,6 +331,43 @@ section {
   font-style: italic;
 }
 
+.thumbnails-container {
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-md);
+}
+
+.thumbnails-container h4 {
+  margin-bottom: var(--spacing-md);
+}
+
+.thumbnails-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.thumbnail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.thumbnail-info {
+  font-size: 0.8rem;
+  margin-top: var(--spacing-xs);
+  color: #6c757d;
+}
+
 /* Upload Page */
 .upload-form-container {
   max-width: 700px;
