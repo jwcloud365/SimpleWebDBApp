@@ -5,7 +5,7 @@
 
 const { run, get, all, transaction } = require('./utils');
 const path = require('path');
-const fs = require('fs/promises');
+const fs = require('fs').promises;
 
 class PicturesDAO {
   /**
@@ -178,9 +178,8 @@ class PicturesDAO {
         if (result.changes === 0) {
           return false;
         }
-        
-        // Delete the actual files (in a real app, these operations would be made more robust)
-        const uploadsDir = path.join(__dirname, '..', 'public', 'uploads');
+          // Delete the actual files (in a real app, these operations would be made more robust)
+        const uploadsDir = path.join(__dirname, '../public/uploads');
         
         // Delete picture file
         try {

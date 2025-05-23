@@ -16,7 +16,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Load configuration from environment variables
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '5242880', 10); // 5MB default
-const ALLOWED_FILE_TYPES = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp')
+const ALLOWED_FILE_TYPES = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml')
   .split(',')
   .map(type => type.trim());
 
@@ -71,22 +71,41 @@ async function generateThumbnail(sourceFilePath, { width = 200, height = null } 
     const thumbnailFilename = `thumb-${filename}${ext}`;
     const thumbnailPath = path.join(uploadsDir, thumbnailFilename);
     
-    // Resize the image
-    const resizeOptions = { width };
-    if (height) {
-      resizeOptions.height = height;
+    // Check if the file is an SVG
+    if (ext.toLowerCase() === '.svg' || path.basename(sourceFilePath).includes('.svg')) {
+      // For SVG files, just copy the file since they're scalable by nature
+      try {
+        await fs.copyFile(sourceFilePath, thumbnailPath);
+      } catch (e) {
+        console.warn(`Could not copy SVG file from ${sourceFilePath} to ${thumbnailPath}: ${e.message}`);
+        // Continue anyway with return values
+      }
+      
+      // We don't have actual metadata, so let's return default values
+      return {
+        filename: thumbnailFilename,
+        path: thumbnailPath,
+        width: width || 200,
+        height: height || 150
+      };
+    } else {
+      // For other image types, use Sharp to resize
+      const resizeOptions = { width };
+      if (height) {
+        resizeOptions.height = height;
+      }
+      
+      const metadata = await sharp(sourceFilePath)
+        .resize(resizeOptions)
+        .toFile(thumbnailPath);
+      
+      return {
+        filename: thumbnailFilename,
+        path: thumbnailPath,
+        width: metadata.width,
+        height: metadata.height
+      };
     }
-    
-    const metadata = await sharp(sourceFilePath)
-      .resize(resizeOptions)
-      .toFile(thumbnailPath);
-    
-    return {
-      filename: thumbnailFilename,
-      path: thumbnailPath,
-      width: metadata.width,
-      height: metadata.height
-    };
   } catch (error) {
     console.error('Error generating thumbnail:', error.message);
     throw error;

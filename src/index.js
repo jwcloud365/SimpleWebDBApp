@@ -38,6 +38,13 @@ app.set('views', path.join(__dirname, '../views'));
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Explicitly serve the uploads directory for images with appropriate headers
+app.use('/uploads', (req, res, next) => {
+  // Add caching headers for images
+  res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
+  next();
+}, express.static(path.join(__dirname, '../public/uploads')));
+
 // Make sure uploads directory exists and is accessible
 const uploadsPath = path.join(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadsPath)) {

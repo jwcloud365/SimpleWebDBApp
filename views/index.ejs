@@ -1,28 +1,41 @@
 <%- include('./partials/header', { title: title, mainClass: 'home-page' }) %>
-    <%- include('./partials/messages') %>
-        <section class="welcome">
-            <h2>Welcome to Your Picture Database</h2>
-            <p>A simple way to store and organize your pictures.</p>
+    <%- include('./partials/messages') %>        <section class="welcome">
+            <div class="welcome-content">
+                <h2>Welcome to Your Picture Database</h2>
+                <p>A simple way to store and organize your pictures.</p>
+                <div class="welcome-buttons">
+                    <a href="/upload" class="btn btn-primary btn-lg" aria-label="Upload new picture" tabindex="0">Upload New Picture</a>
+                </div>
+            </div>
         </section>
-          
-        <section class="gallery">
+            <section class="gallery">
             <div class="gallery-header">
-                <h2>Your Picture Gallery</h2>
-                <a href="/upload" class="btn btn-primary" aria-label="Upload new picture" tabindex="0">Upload New</a>
+                <div class="gallery-title">
+                    <h2>Your Picture Gallery</h2>
+                    <p>View, manage, and delete your uploaded pictures</p>
+                </div>
+                <a href="/upload" class="btn btn-primary" aria-label="Upload new picture" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 5px;">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    Upload New
+                </a>
             </div>
             
             <% if (pictures && pictures.length > 0) { %>
                 <div class="picture-grid" id="pictureGrid">
                     <% pictures.forEach(function(picture) { %>
-                        <div class="picture-card" data-id="<%= picture.id %>">
-                            <div class="picture-thumbnail">
-                                <a href="/pictures/<%= picture.id %>" aria-label="View details for <%= picture.original_name %>" tabindex="0">
-                                    <img src="/api/pictures/<%= picture.id %>/thumbnail" alt="<%= picture.description || picture.original_name %>">
+                        <div class="picture-card" data-id="<%= picture.id %>">                            <div class="picture-thumbnail">                                <a href="/pictures/<%= picture.id %>" aria-label="View details for <%= picture.original_filename %>" tabindex="0">
+                                    <% if (picture.thumbnails && picture.thumbnails.length > 0) { %>
+                                        <img src="/uploads/<%= picture.thumbnails[0].filename %>" alt="<%= picture.description || picture.original_filename %>" onerror="this.src='/uploads/<%= picture.filename %>'">
+                                    <% } else { %>
+                                        <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_filename %>">
+                                    <% } %>
                                 </a>
-                            </div>
-                            <div class="picture-info">
-                                <h3 class="picture-title"><%= picture.original_name %></h3>
-                                <p class="picture-date"><%= new Date(picture.upload_date).toLocaleDateString() %></p>
+                            </div><div class="picture-info">
+                                <h3 class="picture-title"><%= picture.original_filename %></h3>
+                                <p class="picture-date"><%= new Date(picture.created_at).toLocaleDateString() %></p>
                                 <div class="picture-actions">
                                     <a href="/pictures/<%= picture.id %>" class="btn btn-sm btn-secondary" aria-label="View details" tabindex="0">View</a>
                                     <button class="btn btn-sm btn-danger delete-btn" data-id="<%= picture.id %>" aria-label="Delete picture" tabindex="0">Delete</button>
@@ -54,9 +67,8 @@
                 </div>
             <% } %>
         </section>
-        
-        <!-- Delete Confirmation Modal -->
-        <div class="modal" id="deleteModal">
+          <!-- Delete Confirmation Modal -->
+        <div class="modal hidden" id="deleteModal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Confirm Deletion</h3>
@@ -68,10 +80,8 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-danger" id="confirmDeleteBtn" aria-label="Confirm delete picture" tabindex="0">Delete</button>
-                    <button class="btn btn-secondary" id="cancelDeleteBtn" aria-label="Cancel deletion" tabindex="0">Cancel</button>
-                </div>
+                    <button class="btn btn-secondary" id="cancelDeleteBtn" aria-label="Cancel deletion" tabindex="0">Cancel</button>                </div>
             </div>
         </div>
-</section>
 
 <%- include('./partials/footer') %>

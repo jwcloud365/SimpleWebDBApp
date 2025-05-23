@@ -13,10 +13,9 @@
                         Delete
                     </button>
                 </div>
-            </div>
-              <div class="detail-content">
+            </div>              <div class="detail-content">
                 <div class="picture-container">
-                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_filename %>" class="detail-image">
+                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_filename %>" class="detail-image" onerror="this.src='/images/no-image.svg'">
                     
                     <% if (picture.thumbnails && picture.thumbnails.length > 0) { %>
                         <div class="thumbnails-container">
@@ -24,7 +23,7 @@
                             <div class="thumbnails-list">
                                 <% picture.thumbnails.forEach(function(thumb) { %>
                                     <div class="thumbnail-item">
-                                        <img src="/uploads/<%= thumb.filename %>" alt="Thumbnail" class="thumbnail-image">
+                                        <img src="/uploads/<%= thumb.filename %>" alt="Thumbnail" class="thumbnail-image" onerror="this.src='/uploads/<%= picture.filename %>'">
                                         <span class="thumbnail-info"><%= thumb.width %>x<%= thumb.height %></span>
                                     </div>
                                 <% }); %>
@@ -73,9 +72,8 @@
                 </div>
             </div>
         </section>
-        
-        <!-- Delete Confirmation Modal -->
-        <div class="modal" id="deleteModal">
+          <!-- Delete Confirmation Modal -->
+        <div class="modal hidden" id="deleteModal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Confirm Deletion</h3>

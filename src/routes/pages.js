@@ -29,15 +29,21 @@ router.get('/pictures/:id', async (req, res, next) => {
       error.status = 400;
       return next(error);
     }
-    
-    const picture = await picturesDao.getById(id);
+      const picture = await picturesDao.getById(id);
     
     if (!picture) {
       const error = new Error('Picture not found');
       error.status = 404;
       return next(error);
     }
-      res.render('detail', { 
+    
+    // Get thumbnails for this picture
+    const thumbnails = await picturesDao.getThumbnails(id);
+    
+    // Add thumbnails to the picture object
+    picture.thumbnails = thumbnails || [];
+      
+    res.render('detail', { 
       title: `Picture: ${picture.original_filename}`,
       picture,
       success: req.query.success,

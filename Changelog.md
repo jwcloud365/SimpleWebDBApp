@@ -77,6 +77,37 @@ All notable changes to this project will be documented in this file.
 - File upload security validation and type checking
 - API response consistency and error message standardization
 - SQL injection prevention through parameterized queries
+- Image display issues in gallery and detail views
+- SVG image handling and thumbnail generation
+- Inconsistent thumbnail naming patterns
+- Fallback mechanisms for missing images
+- Image error handling in JavaScript
+- Added no-image SVG placeholder for missing images
+- Path handling improvements in file upload middleware
+- Fixed thumbnail generation for SVG files
+- Improved static file serving with proper caching headers
+
+### Fixed (Earlier)
+- Image display issues in gallery and detail views
+- SVG image handling and thumbnail generation
+- Inconsistent thumbnail naming patterns
+- Fallback mechanisms for missing images
+- Image error handling in JavaScript
+- Added no-image SVG placeholder for missing images
+- Path handling improvements in file upload middleware
+- Fixed thumbnail generation for SVG files
+- Improved static file serving with proper caching headers
+
+### Fixed (Latest)
+- Fixed delete functionality in both gallery and detail pages
+- Fixed edit button functionality in detail view
+- Added proper CSS for edit form to ensure visibility
+- Fixed modal dialog display issues with consistent hidden class usage
+- Enhanced error handling in delete and edit operations
+- Fixed file deletion in picturesDao.js by correcting fs module import
+- Updated API response for PUT requests to include description for edit form
+- Added loading states to delete buttons during deletion operations
+- Improved error messaging to help with troubleshooting
 
 ### Technical Updates
 - Commit e6c7c21: "Update backend components and middleware functionality"
