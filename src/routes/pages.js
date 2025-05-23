@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const PicturesDAO = require('../database/picturesDao');
+const picturesDao = require('../../database/picturesDao');
 
 /**
  * GET /upload - Render the upload form page
@@ -22,16 +22,14 @@ router.get('/upload', (req, res) => {
  * GET /pictures/:id - Render the picture detail page
  */
 router.get('/pictures/:id', async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
+  try {    const id = parseInt(req.params.id);
     
     if (isNaN(id)) {
       const error = new Error('Invalid picture ID');
       error.status = 400;
       return next(error);
     }
-    
-    const picture = await PicturesDAO.findById(id);
+      const picture = await picturesDao.getById(id);
     
     if (!picture) {
       const error = new Error('Picture not found');
@@ -39,8 +37,14 @@ router.get('/pictures/:id', async (req, res, next) => {
       return next(error);
     }
     
+    // Get thumbnails for this picture
+    const thumbnails = await picturesDao.getThumbnails(id);
+    
+    // Add thumbnails to the picture object
+    picture.thumbnails = thumbnails || [];
+      
     res.render('detail', { 
-      title: `Picture: ${picture.original_name}`,
+      title: `Picture: ${picture.original_filename}`,
       picture,
       success: req.query.success,
       error: req.query.error
@@ -54,11 +58,10 @@ router.get('/pictures/:id', async (req, res, next) => {
  * GET / - Render the homepage with gallery
  */
 router.get('/', async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
+  try {    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     
-    const result = await PicturesDAO.findAll({ page, limit });
+    const result = await picturesDao.getAll({ page, limit });
     
     res.render('index', { 
       title: 'Simple Picture Database',

@@ -94,12 +94,11 @@ const initUploadForm = () => {
             throw new Error('Upload failed');
           }
           return response.json();
-        })
-        .then(data => {
+        })        .then(data => {
           console.log('Upload successful:', data);
           
           // Redirect to the detail page for the new picture
-          window.location.href = `/pictures/${data.id}?success=true`;
+          window.location.href = `/pictures/${data.picture.id}?success=true`;
         })
         .catch(error => {
           console.error('Error uploading picture:', error);

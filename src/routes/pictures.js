@@ -24,10 +24,9 @@ router.post('/', upload.single('picture'), validatePicture, async (req, res, nex
     // Get the uploaded file details
     const { filename, originalname, mimetype, size } = req.file;
     const { description } = req.body;
-    
-    // Generate a thumbnail
+      // Generate a thumbnail
     const thumbnail = await generateThumbnail(
-      path.join(__dirname, '../../public/uploads', filename)
+      req.file.path
     );
     
     // Create the picture record in the database
@@ -138,14 +137,16 @@ router.put('/:id', validatePicture, async (req, res, next) => {
     if (isNaN(id)) {
       return res.status(400).json({ error: 'Invalid picture ID' });
     }
-    
-    const updated = await picturesDao.updateDescription(id, description);
+      const updated = await picturesDao.updateDescription(id, description);
     
     if (!updated) {
       return res.status(404).json({ error: 'Picture not found' });
     }
     
-    res.json({ message: 'Picture description updated successfully' });
+    res.json({ 
+      message: 'Picture description updated successfully',
+      description: description 
+    });
   } catch (error) {
     next(error);
   }
@@ -194,19 +195,36 @@ router.get('/:id/thumbnail', async (req, res, next) => {
     if (!picture) {
       return res.status(404).json({ error: 'Picture not found' });
     }
-    
-    // Find the thumbnail for this picture
+      // Find the thumbnail for this picture
     const thumbnails = await picturesDao.getThumbnails(id);
     
     if (!thumbnails || thumbnails.length === 0) {
-      return res.status(404).json({ error: 'Thumbnail not found' });
+      // If no thumbnail exists, redirect to the original image as a fallback
+      return res.redirect(`/uploads/${picture.filename}`);
     }
     
     // Get the first thumbnail (we might have multiple sizes in the future)
     const thumbnail = thumbnails[0];
     
-    // Redirect to the thumbnail file
-    res.redirect(`/uploads/${thumbnail.filename}`);
+    // Check if thumbnail file exists, if not use original image as fallback
+    const thumbnailPath = path.join(__dirname, '../../public/uploads', thumbnail.filename);
+    const originalPath = path.join(__dirname, '../../public/uploads', picture.filename);
+    
+    try {
+      // Check if the thumbnail file exists
+      await fs.access(thumbnailPath);
+      // Thumbnail exists, redirect to it
+      res.redirect(`/uploads/${thumbnail.filename}`);
+    } catch (err) {
+      // Thumbnail file doesn't exist, use original image as fallback
+      try {
+        await fs.access(originalPath);
+        res.redirect(`/uploads/${picture.filename}`);
+      } catch (origErr) {
+        // Neither thumbnail nor original exists
+        res.status(404).json({ error: 'Image file not found' });
+      }
+    }
   } catch (error) {
     next(error);
   }

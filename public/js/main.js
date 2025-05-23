@@ -49,6 +49,9 @@ const handleAlertClose = function() {
  * Initialize gallery functionality
  */
 const initGallery = () => {
+  // Handle image loading errors
+  handleImageErrors();
+  
   // Gallery delete buttons
   const deleteButtons = document.querySelectorAll('.gallery .delete-btn');
   const deleteModal = document.getElementById('deleteModal');
@@ -132,11 +135,41 @@ const initGallery = () => {
 };
 
 /**
+ * Handle image loading errors by providing fallbacks
+ */
+const handleImageErrors = () => {
+  // Find all images in the gallery
+  const galleryImages = document.querySelectorAll('.picture-thumbnail img, .detail-image, .thumbnail-image');
+  
+  galleryImages.forEach(img => {
+    // Add error handler if not already present
+    if (!img.hasAttribute('data-error-handled')) {
+      img.setAttribute('data-error-handled', 'true');
+      
+      img.addEventListener('error', function() {
+        console.warn(`Failed to load image: ${this.src}`);
+        
+        // Try to get the original image if this is a thumbnail
+        if (this.src.includes('thumb-')) {
+          const originalSrc = this.src.replace('thumb-', '');
+          console.log(`Attempting to load original image: ${originalSrc}`);
+          this.src = originalSrc;
+        } else {
+          // Fall back to placeholder
+          this.src = '/images/no-image.svg';
+        }
+      });
+    }
+  });
+};
+
+/**
  * Open a modal dialog
  * @param {HTMLElement} modal - The modal element to open
  */
 const openModal = (modal) => {
   modal.style.display = 'flex';
+  modal.classList.remove('hidden');
   // Focus the first focusable element
   const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
   if (focusableElements.length) {
@@ -150,6 +183,7 @@ const openModal = (modal) => {
  */
 const closeModal = (modal) => {
   modal.style.display = 'none';
+  modal.classList.add('hidden');
 };
 
 /**
@@ -157,6 +191,13 @@ const closeModal = (modal) => {
  * @param {string} id - The ID of the picture to delete
  */
 const deletePicture = (id) => {
+  // Show that we're processing
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.textContent = 'Deleting...';
+    confirmDeleteBtn.disabled = true;
+  }
+
   fetch(`/api/pictures/${id}`, {
     method: 'DELETE',
     headers: {
@@ -165,7 +206,7 @@ const deletePicture = (id) => {
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to delete picture');
+        throw new Error(`Failed to delete picture: ${response.status}`);
       }
       return response.json();
     })
@@ -176,8 +217,7 @@ const deletePicture = (id) => {
       if (pictureCard) {
         pictureCard.style.opacity = '0';
         pictureCard.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-          pictureCard.remove();
+        setTimeout(() => {          pictureCard.remove();
           
           // Check if grid is empty and show empty state if needed
           const pictureGrid = document.getElementById('pictureGrid');
@@ -188,7 +228,52 @@ const deletePicture = (id) => {
               <p>No pictures yet. Start by uploading one!</p>
               <a href="/upload" class="btn btn-primary" aria-label="Upload new picture" tabindex="0">Upload Picture</a>
             `;
-            pictureGrid.replaceWith(emptyState);
+            
+            // Create a success message above the empty state
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success';
+            successMessage.innerHTML = `
+              Picture deleted successfully!
+              <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>            `;
+            
+            const mainContainer = document.querySelector('main.container');
+            if (mainContainer) {
+              mainContainer.insertBefore(successMessage, mainContainer.firstChild);
+              pictureGrid.replaceWith(emptyState);
+              
+              // Initialize the close button for the success message
+              const closeBtn = successMessage.querySelector('.alert-close');
+              if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                  successMessage.style.opacity = '0';
+                  setTimeout(() => successMessage.remove(), 300);
+                });
+              }
+            } else {
+              pictureGrid.replaceWith(emptyState);
+            }
+          } else {
+            // If we still have pictures, just show the success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success';
+            successMessage.innerHTML = `
+              Picture deleted successfully!
+              <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+            `;
+            
+            const mainContainer = document.querySelector('main.container');
+            if (mainContainer) {
+              mainContainer.insertBefore(successMessage, mainContainer.firstChild);
+              
+              // Initialize the close button for the success message
+              const closeBtn = successMessage.querySelector('.alert-close');
+              if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                  successMessage.style.opacity = '0';
+                  setTimeout(() => successMessage.remove(), 300);
+                });
+              }
+            }
           }
         }, 300);
       }

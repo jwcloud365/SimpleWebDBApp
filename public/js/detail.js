@@ -7,7 +7,40 @@ document.addEventListener('DOMContentLoaded', () => {
   
   initEditFunctionality();
   initDeleteFunctionality();
+  handleDetailPageImages();
 });
+
+/**
+ * Handle image errors for the detail page
+ */
+const handleDetailPageImages = () => {
+  // Get the main detail image
+  const detailImage = document.querySelector('.detail-image');
+  if (detailImage) {
+    detailImage.addEventListener('error', function() {
+      console.warn(`Failed to load detail image: ${this.src}`);
+      this.src = '/images/no-image.svg';
+    });
+  }
+  
+  // Handle thumbnail images
+  const thumbnailImages = document.querySelectorAll('.thumbnail-image');
+  thumbnailImages.forEach(img => {
+    img.addEventListener('error', function() {
+      console.warn(`Failed to load thumbnail image: ${this.src}`);
+      
+      // Try to get the original image if this is a thumbnail
+      if (this.src.includes('thumb-')) {
+        const originalSrc = this.src.replace('thumb-', '');
+        console.log(`Attempting to load original image: ${originalSrc}`);
+        this.src = originalSrc;
+      } else {
+        // Fall back to placeholder
+        this.src = '/images/no-image.svg';
+      }
+    });
+  });
+};
 
 /**
  * Initialize edit functionality for picture description
@@ -198,6 +231,7 @@ const initDeleteFunctionality = () => {
  */
 const openModal = (modal) => {
   modal.style.display = 'flex';
+  modal.classList.remove('hidden');
   // Focus the first focusable element
   const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
   if (focusableElements.length) {
@@ -211,6 +245,7 @@ const openModal = (modal) => {
  */
 const closeModal = (modal) => {
   modal.style.display = 'none';
+  modal.classList.add('hidden');
 };
 
 /**
@@ -218,6 +253,13 @@ const closeModal = (modal) => {
  */
 const handleConfirmDelete = () => {
   const pictureId = window.location.pathname.split('/').pop();
+  
+  // Show that we're processing
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.textContent = 'Deleting...';
+    confirmDeleteBtn.disabled = true;
+  }
   
   fetch(`/api/pictures/${pictureId}`, {
     method: 'DELETE',
@@ -227,18 +269,24 @@ const handleConfirmDelete = () => {
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to delete picture');
+        throw new Error(`Failed to delete picture: ${response.status}`);
       }
       return response.json();
     })
     .then(data => {
       console.log('Delete successful:', data);
       
-      // Redirect to gallery
+      // Redirect to gallery with deleted=true parameter
       window.location.href = '/?deleted=true';
     })
     .catch(error => {
       console.error('Error deleting picture:', error);
+      
+      // Reset button state
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.textContent = 'Delete';
+        confirmDeleteBtn.disabled = false;
+      }
       
       // Close the modal
       const deleteModal = document.getElementById('deleteModal');
@@ -247,6 +295,6 @@ const handleConfirmDelete = () => {
       }
       
       // Show error
-      alert('Error deleting picture. Please try again.');
+      alert('Error deleting picture. Please try again. Error: ' + error.message);
     });
 };

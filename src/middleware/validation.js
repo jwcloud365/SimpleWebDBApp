@@ -7,14 +7,11 @@
  */
 function validatePicture(req, res, next) {
   const errors = [];
-  
-  // Validate description
+    // Validate description
   if (req.body.description !== undefined) {
     const description = req.body.description.trim();
     
-    if (description.length === 0) {
-      errors.push('Description cannot be empty');
-    } else if (description.length > 1000) {
+    if (description.length > 1000) {
       errors.push('Description cannot exceed 1000 characters');
     }
     
@@ -25,9 +22,6 @@ function validatePicture(req, res, next) {
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#x27;');
-  } else if (req.method === 'POST') {
-    // Description is required for new uploads
-    errors.push('Description is required');
   }
   
   // For file uploads, Multer will handle the validation

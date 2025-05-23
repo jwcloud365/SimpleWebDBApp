@@ -12,6 +12,13 @@
     </div>
 <% } %>
 
+<% if (typeof deleted !== 'undefined' && deleted === true) { %>
+    <div class="alert alert-success" role="alert">
+        Picture deleted successfully!
+        <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+    </div>
+<% } %>
+
 <% if (typeof info !== 'undefined' && info && info.length > 0) { %>
     <div class="alert alert-info" role="alert">
         <%= info %>
