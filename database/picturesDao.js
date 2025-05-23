@@ -7,6 +7,34 @@ const { run, get, all, transaction } = require('./utils');
 const path = require('path');
 const fs = require('fs').promises;
 
+// Enhanced logging helper
+const logger = {
+  log: (message, data = null) => {
+    const timestamp = new Date().toISOString();
+    if (data) {
+      console.log(`[DAO][${timestamp}] ${message}`, data);
+    } else {
+      console.log(`[DAO][${timestamp}] ${message}`);
+    }
+  },
+  error: (message, error = null) => {
+    const timestamp = new Date().toISOString();
+    if (error) {
+      console.error(`[DAO][${timestamp}] ERROR: ${message}`, error);
+    } else {
+      console.error(`[DAO][${timestamp}] ERROR: ${message}`);
+    }
+  },
+  warn: (message, data = null) => {
+    const timestamp = new Date().toISOString();
+    if (data) {
+      console.warn(`[DAO][${timestamp}] WARN: ${message}`, data);
+    } else {
+      console.warn(`[DAO][${timestamp}] WARN: ${message}`);
+    }
+  }
+};
+
 class PicturesDAO {
   /**
    * Create a new picture record in the database
@@ -32,12 +60,14 @@ class PicturesDAO {
         ]
       );
       
+      logger.log('Picture created:', { id: result.lastID, ...picture });
+      
       return {
         id: result.lastID,
         ...picture
       };
     } catch (error) {
-      console.error('Error creating picture:', error.message);
+      logger.error('Error creating picture:', error);
       throw error;
     }
   }
@@ -49,15 +79,19 @@ class PicturesDAO {
    */
   async getById(id) {
     try {
-      return await get(
+      const picture = await get(
         `SELECT id, filename, original_filename, description, mimetype, size, 
                 created_at, updated_at
          FROM pictures
          WHERE id = ?`,
         [id]
       );
+      
+      logger.log('Picture retrieved by ID:', { id, picture });
+      
+      return picture;
     } catch (error) {
-      console.error(`Error getting picture with ID ${id}:`, error.message);
+      logger.error(`Error getting picture with ID ${id}:`, error);
       throw error;
     }
   }
@@ -106,6 +140,8 @@ class PicturesDAO {
         );
       }
       
+      logger.log('Pictures retrieved:', { page, limit, total, totalPages });
+      
       return {
         pictures,
         pagination: {
@@ -118,7 +154,7 @@ class PicturesDAO {
         }
       };
     } catch (error) {
-      console.error('Error getting pictures:', error.message);
+      logger.error('Error getting pictures:', error);
       throw error;
     }
   }
@@ -131,6 +167,25 @@ class PicturesDAO {
    */
   async updateDescription(id, description) {
     try {
+      logger.log(`Starting update of description for picture ${id}`, {
+        id,
+        newDescription: description,
+        descriptionLength: description ? description.length : 0
+      });
+      
+      // Get current picture data first for logging
+      const currentPicture = await this.getById(id);
+      if (!currentPicture) {
+        logger.error(`Cannot update picture ${id} - not found in database`);
+        return false;
+      }
+      
+      logger.log(`Current picture data before update:`, {
+        id: currentPicture.id,
+        currentDescription: currentPicture.description,
+        filename: currentPicture.filename
+      });
+      
       const result = await run(
         `UPDATE pictures
          SET description = ?, updated_at = CURRENT_TIMESTAMP
@@ -138,9 +193,26 @@ class PicturesDAO {
         [description, id]
       );
       
-      return result.changes > 0;
+      const updated = result.changes > 0;
+      
+      if (updated) {
+        logger.log(`Successfully updated picture ${id} description`, {
+          id,
+          oldDescription: currentPicture.description,
+          newDescription: description,
+          changes: result.changes
+        });
+      } else {
+        logger.error(`Failed to update picture ${id} - no rows changed`, {
+          id,
+          description,
+          currentPicture
+        });
+      }
+      
+      return updated;
     } catch (error) {
-      console.error(`Error updating picture ${id}:`, error.message);
+      logger.error(`Error updating picture ${id}:`, error);
       throw error;
     }
   }
@@ -152,22 +224,29 @@ class PicturesDAO {
    */
   async delete(id) {
     try {
+      logger.log(`Starting deletion of picture ${id}`);
+      
       // Use a transaction to ensure both database and files are deleted
       return await transaction(async (txn) => {
-        // Get picture and thumbnail details before deletion
+        // Get full picture details before deletion for better logging
         const picture = await txn.get(
-          'SELECT filename FROM pictures WHERE id = ?',
+          'SELECT id, filename, original_filename, mimetype, size FROM pictures WHERE id = ?',
           [id]
         );
         
         if (!picture) {
+          logger.error(`Picture ${id} not found for deletion`);
           return false;
         }
         
+        logger.log(`Found picture to delete:`, picture);
+        
         const thumbnails = await txn.all(
-          'SELECT filename FROM thumbnails WHERE picture_id = ?',
+          'SELECT id, filename, width, height FROM thumbnails WHERE picture_id = ?',
           [id]
         );
+        
+        logger.log(`Found ${thumbnails.length} thumbnails for picture ${id}`, thumbnails);
         
         // Delete from database (thumbnails will be deleted via foreign key cascade)
         const result = await txn.run(
@@ -176,33 +255,74 @@ class PicturesDAO {
         );
         
         if (result.changes === 0) {
+          logger.error(`Failed to delete picture ${id} from database - no rows affected`);
           return false;
         }
-          // Delete the actual files (in a real app, these operations would be made more robust)
+        
+        logger.log(`Picture ${id} deleted from database successfully`, { 
+          changes: result.changes,
+          lastID: result.lastID 
+        });
+        
+        // Delete the actual files (in a real app, these operations would be made more robust)
         const uploadsDir = path.join(__dirname, '../public/uploads');
         
         // Delete picture file
         try {
-          await fs.unlink(path.join(uploadsDir, picture.filename));
+          const picturePath = path.join(uploadsDir, picture.filename);
+          logger.log(`Deleting picture file: ${picturePath}`);
+          
+          await fs.access(picturePath).then(
+            async () => {
+              await fs.unlink(picturePath);
+              logger.log(`Successfully deleted picture file: ${picture.filename}`);
+            },
+            () => {
+              logger.warn(`Picture file not found at ${picturePath}`);
+            }
+          );
         } catch (fileError) {
-          console.warn(`Could not delete picture file ${picture.filename}:`, fileError.message);
+          logger.warn(`Could not delete picture file ${picture.filename}:`, fileError);
           // Continue with other deletions
         }
         
         // Delete thumbnail files
+        let deletedThumbnails = 0;
+        let failedThumbnails = 0;
+        
         for (const thumbnail of thumbnails) {
           try {
-            await fs.unlink(path.join(uploadsDir, thumbnail.filename));
+            const thumbnailPath = path.join(uploadsDir, thumbnail.filename);
+            logger.log(`Deleting thumbnail file: ${thumbnailPath}`);
+            
+            await fs.access(thumbnailPath).then(
+              async () => {
+                await fs.unlink(thumbnailPath);
+                logger.log(`Successfully deleted thumbnail file: ${thumbnail.filename}`);
+                deletedThumbnails++;
+              },
+              () => {
+                logger.warn(`Thumbnail file not found at ${thumbnailPath}`);
+                failedThumbnails++;
+              }
+            );
           } catch (fileError) {
-            console.warn(`Could not delete thumbnail file ${thumbnail.filename}:`, fileError.message);
+            logger.warn(`Could not delete thumbnail file ${thumbnail.filename}:`, fileError);
+            failedThumbnails++;
             // Continue with other deletions
           }
         }
         
+        logger.log(`File deletion summary for picture ${id}:`, {
+          totalThumbnails: thumbnails.length,
+          deletedThumbnails,
+          failedThumbnails
+        });
+        
         return true;
       });
     } catch (error) {
-      console.error(`Error deleting picture ${id}:`, error.message);
+      logger.error(`Error deleting picture ${id}:`, error);
       throw error;
     }
   }
@@ -228,12 +348,14 @@ class PicturesDAO {
         ]
       );
       
+      logger.log('Thumbnail created:', { id: result.lastID, ...thumbnail });
+      
       return {
         id: result.lastID,
         ...thumbnail
       };
     } catch (error) {
-      console.error('Error creating thumbnail:', error.message);
+      logger.error('Error creating thumbnail:', error);
       throw error;
     }
   }
@@ -245,14 +367,18 @@ class PicturesDAO {
    */
   async getThumbnails(pictureId) {
     try {
-      return await all(
+      const thumbnails = await all(
         `SELECT id, filename, width, height, created_at
          FROM thumbnails
          WHERE picture_id = ?`,
         [pictureId]
       );
+      
+      logger.log('Thumbnails retrieved for picture:', { pictureId, thumbnails });
+      
+      return thumbnails;
     } catch (error) {
-      console.error(`Error getting thumbnails for picture ${pictureId}:`, error.message);
+      logger.error(`Error getting thumbnails for picture ${pictureId}:`, error);
       throw error;
     }
   }

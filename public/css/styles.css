@@ -392,6 +392,10 @@ section {
   min-height: 100px;
 }
 
+.description-display.hidden {
+  display: none !important;
+}
+
 .no-description {
   color: #6c757d;
   font-style: italic;
@@ -502,16 +506,23 @@ section {
 
 /* Modal */
 .modal {
-  display: none;
+  display: flex;
   position: fixed;
-  z-index: 1000;
-  left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  align-items: center;
+  z-index: 1000;
   justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+  display: none !important;
+  opacity: 0;
 }
 
 .modal-content {
@@ -665,10 +676,17 @@ section {
 
 /* Edit form styles */
 .edit-form {
+  display: block;
   background-color: #f8f9fa;
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
   margin-top: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-form.hidden {
+  display: none !important;
 }
 
 .edit-form textarea {
@@ -678,13 +696,6 @@ section {
   border-radius: var(--border-radius);
   resize: vertical;
   min-height: 100px;
-}
-
-.form-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
-  justify-content: flex-end;
 }
 
 /* Responsive Adjustments */

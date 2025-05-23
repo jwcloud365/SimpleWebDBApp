@@ -2,17 +2,32 @@
  * Main JavaScript file for the Simple Picture Database
  */
 
+// Simple console logger
+const logger = {
+  log: console.log,
+  error: console.error,
+  warn: console.warn
+};
+
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Simple Picture Database initialized');
+  console.log('Main script initialized');
   
-  // Initialize alert close functionality
-  initAlerts();
-  
-  // Initialize gallery functionality if on the gallery page
-  const pictureGrid = document.getElementById('pictureGrid');
-  if (pictureGrid) {
-    initGallery();
+  try {
+    // Initialize alert close functionality
+    initAlerts();
+    
+    // Initialize gallery functionality if on the gallery page - do this with a small delay
+    // to avoid blocking the main thread during page load
+    setTimeout(() => {
+      const pictureGrid = document.getElementById('pictureGrid');
+      if (pictureGrid) {
+        console.log('Initializing gallery with delay');
+        initGallery();
+      }
+    }, 100);
+  } catch (error) {
+    console.error('Error initializing main script:', error);
   }
 });
 
@@ -36,12 +51,65 @@ const initAlerts = () => {
  * Handle closing an alert message
  */
 const handleAlertClose = function() {
-  const alert = this.closest('.alert');
-  if (alert) {
-    alert.style.opacity = '0';
-    setTimeout(() => {
-      alert.style.display = 'none';
-    }, 300);
+  try {
+    const alert = this.closest('.alert');
+    if (alert) {
+      console.log('Closing alert message');
+      alert.style.opacity = '0';
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 300);
+    }
+  } catch (error) {
+    console.error('Error closing alert:', error);
+  }
+};
+
+/**
+ * Handle image loading errors
+ */
+const handleImageErrors = () => {
+  try {
+    const galleryImages = document.querySelectorAll('.picture-thumbnail img, .detail-image, .thumbnail-image');
+    console.log(`Setting up error handlers for ${galleryImages.length} images`);
+    
+    // Process images in small batches to avoid blocking the main thread
+    const processImageBatch = (startIndex, batchSize) => {
+      const endIndex = Math.min(startIndex + batchSize, galleryImages.length);
+      
+      for (let i = startIndex; i < endIndex; i++) {
+        const img = galleryImages[i];
+        // Add error handler if not already present
+        if (!img.hasAttribute('data-error-handled')) {
+          img.setAttribute('data-error-handled', 'true');
+          
+          img.addEventListener('error', function() {
+            console.warn(`Failed to load image: ${this.src}`);
+            
+            // Try to get the original image if this is a thumbnail
+            if (this.src.includes('thumb-')) {
+              const originalSrc = this.src.replace('thumb-', '');
+              this.src = originalSrc;
+            } else {
+              // Fall back to placeholder
+              this.src = '/images/no-image.svg';
+            }
+          });
+        }
+      }
+      
+      // Process next batch if there are more images
+      if (endIndex < galleryImages.length) {
+        setTimeout(() => {
+          processImageBatch(endIndex, batchSize);
+        }, 0);
+      }
+    };
+    
+    // Start processing images in batches of 10
+    processImageBatch(0, 10);
+  } catch (error) {
+    console.error('Error setting up image error handlers:', error);
   }
 };
 
@@ -49,21 +117,26 @@ const handleAlertClose = function() {
  * Initialize gallery functionality
  */
 const initGallery = () => {
-  // Handle image loading errors
-  handleImageErrors();
-  
-  // Gallery delete buttons
-  const deleteButtons = document.querySelectorAll('.gallery .delete-btn');
-  const deleteModal = document.getElementById('deleteModal');
-  
-  if (deleteButtons.length && deleteModal) {
-    let pictureIdToDelete = null;
+  try {
+    // Handle image loading errors - do this with a slight delay
+    setTimeout(() => {
+      handleImageErrors();
+    }, 100);
     
-    // Delete button click
-    deleteButtons.forEach(button => {
+    // Gallery delete buttons
+    const deleteButtons = document.querySelectorAll('.gallery .delete-btn');
+    const deleteModal = document.getElementById('deleteModal');
+    
+    if (deleteButtons.length && deleteModal) {
+      console.log(`Found ${deleteButtons.length} delete buttons and delete modal`);
+      let pictureIdToDelete = null;
+      
+      // Delete button click
+      deleteButtons.forEach(button => {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         pictureIdToDelete = button.dataset.id;
+        logger.log(`Delete button clicked for picture ID: ${pictureIdToDelete}`);
         openModal(deleteModal);
       });
       
@@ -71,6 +144,7 @@ const initGallery = () => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           pictureIdToDelete = button.dataset.id;
+          logger.log(`Delete button activated via keyboard for picture ID: ${pictureIdToDelete}`);
           openModal(deleteModal);
         }
       });
@@ -79,10 +153,15 @@ const initGallery = () => {
     // Modal close button
     const closeModalBtn = document.getElementById('closeModalBtn');
     if (closeModalBtn) {
-      closeModalBtn.addEventListener('click', () => closeModal(deleteModal));
+      closeModalBtn.addEventListener('click', () => {
+        logger.log('Close modal button clicked');
+        closeModal(deleteModal);
+      });
+      
       closeModalBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          logger.log('Close modal button activated via keyboard');
           closeModal(deleteModal);
         }
       });
@@ -91,10 +170,15 @@ const initGallery = () => {
     // Cancel delete button
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     if (cancelDeleteBtn) {
-      cancelDeleteBtn.addEventListener('click', () => closeModal(deleteModal));
+      cancelDeleteBtn.addEventListener('click', () => {
+        logger.log('Cancel delete button clicked');
+        closeModal(deleteModal);
+      });
+      
       cancelDeleteBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          logger.log('Cancel delete button activated via keyboard');
           closeModal(deleteModal);
         }
       });
@@ -105,62 +189,49 @@ const initGallery = () => {
     if (confirmDeleteBtn) {
       confirmDeleteBtn.addEventListener('click', () => {
         if (pictureIdToDelete) {
+          logger.log(`Confirm delete button clicked for picture ID: ${pictureIdToDelete}`);
           deletePicture(pictureIdToDelete);
+        } else {
+          logger.error('Attempted to delete but no picture ID was set');
         }
       });
+      
       confirmDeleteBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           if (pictureIdToDelete) {
+            logger.log(`Confirm delete button activated via keyboard for picture ID: ${pictureIdToDelete}`);
             deletePicture(pictureIdToDelete);
+          } else {
+            logger.error('Attempted to delete via keyboard but no picture ID was set');
           }
         }
       });
     }
     
-    // Close modal when clicking outside
+    // Close modal on click outside
     window.addEventListener('click', (e) => {
       if (e.target === deleteModal) {
+        logger.log('Clicked outside modal, closing');
         closeModal(deleteModal);
       }
     });
-    
-    // Close modal with Escape key
+      // Close modal with Escape key
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && deleteModal.style.display === 'flex') {
+        console.log('Escape key pressed, closing modal');
         closeModal(deleteModal);
       }
     });
-  }
-};
-
-/**
- * Handle image loading errors by providing fallbacks
- */
-const handleImageErrors = () => {
-  // Find all images in the gallery
-  const galleryImages = document.querySelectorAll('.picture-thumbnail img, .detail-image, .thumbnail-image');
-  
-  galleryImages.forEach(img => {
-    // Add error handler if not already present
-    if (!img.hasAttribute('data-error-handled')) {
-      img.setAttribute('data-error-handled', 'true');
-      
-      img.addEventListener('error', function() {
-        console.warn(`Failed to load image: ${this.src}`);
-        
-        // Try to get the original image if this is a thumbnail
-        if (this.src.includes('thumb-')) {
-          const originalSrc = this.src.replace('thumb-', '');
-          console.log(`Attempting to load original image: ${originalSrc}`);
-          this.src = originalSrc;
-        } else {
-          // Fall back to placeholder
-          this.src = '/images/no-image.svg';
-        }
-      });
+  } else {
+    // Log if components are missing on gallery pages
+    if (document.querySelector('.gallery')) {
+      console.warn('Gallery found but missing delete components');
     }
-  });
+  }
+  } catch (error) {
+    console.error('Error initializing gallery:', error);
+  }
 };
 
 /**
@@ -168,12 +239,18 @@ const handleImageErrors = () => {
  * @param {HTMLElement} modal - The modal element to open
  */
 const openModal = (modal) => {
-  modal.style.display = 'flex';
-  modal.classList.remove('hidden');
-  // Focus the first focusable element
-  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
-  if (focusableElements.length) {
-    focusableElements[0].focus();
+  try {
+    console.log(`Opening modal`);
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    
+    // Focus the first focusable element
+    const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+    if (focusableElements.length) {
+      focusableElements[0].focus();
+    }
+  } catch (error) {
+    console.error('Error opening modal:', error);
   }
 };
 
@@ -182,8 +259,13 @@ const openModal = (modal) => {
  * @param {HTMLElement} modal - The modal element to close
  */
 const closeModal = (modal) => {
-  modal.style.display = 'none';
-  modal.classList.add('hidden');
+  try {
+    console.log(`Closing modal`);
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  } catch (error) {
+    console.error('Error closing modal:', error);
+  }
 };
 
 /**
@@ -191,11 +273,14 @@ const closeModal = (modal) => {
  * @param {string} id - The ID of the picture to delete
  */
 const deletePicture = (id) => {
+  logger.log(`Attempting to delete picture with ID: ${id}`);
+  
   // Show that we're processing
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
   if (confirmDeleteBtn) {
     confirmDeleteBtn.textContent = 'Deleting...';
     confirmDeleteBtn.disabled = true;
+    logger.log('Delete button set to loading state');
   }
 
   fetch(`/api/pictures/${id}`, {
@@ -206,22 +291,27 @@ const deletePicture = (id) => {
   })
     .then(response => {
       if (!response.ok) {
+        logger.error(`Delete failed with status: ${response.status}`);
         throw new Error(`Failed to delete picture: ${response.status}`);
       }
       return response.json();
     })
     .then(data => {
-      console.log('Delete successful:', data);
-      // Remove the picture card from the DOM
+      logger.log('Delete successful:', data);
+      
+      // Remove the picture from the DOM with a fade effect
       const pictureCard = document.querySelector(`.picture-card[data-id="${id}"]`);
       if (pictureCard) {
+        logger.log(`Removing picture card from DOM for ID: ${id}`);
         pictureCard.style.opacity = '0';
-        pictureCard.style.transform = 'scale(0.9)';
-        setTimeout(() => {          pictureCard.remove();
+        
+        setTimeout(() => {
+          pictureCard.remove();
           
           // Check if grid is empty and show empty state if needed
           const pictureGrid = document.getElementById('pictureGrid');
           if (pictureGrid && pictureGrid.children.length === 0) {
+            logger.log('No more pictures, showing empty state');
             const emptyState = document.createElement('div');
             emptyState.className = 'empty-state';
             emptyState.innerHTML = `
@@ -254,6 +344,7 @@ const deletePicture = (id) => {
             }
           } else {
             // If we still have pictures, just show the success message
+            logger.log('Pictures remain, showing success message');
             const successMessage = document.createElement('div');
             successMessage.className = 'alert alert-success';
             successMessage.innerHTML = `
@@ -285,13 +376,46 @@ const deletePicture = (id) => {
       }
     })
     .catch(error => {
-      console.error('Error deleting picture:', error);
-      alert('Error deleting picture. Please try again.');
+      logger.error('Error deleting picture:', error);
+      
+      // Reset button state
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.textContent = 'Delete';
+        confirmDeleteBtn.disabled = false;
+      }
       
       // Close the modal
       const deleteModal = document.getElementById('deleteModal');
       if (deleteModal) {
         closeModal(deleteModal);
+      }
+      
+      // Show error message
+      const errorAlert = document.createElement('div');
+      errorAlert.className = 'alert alert-error';
+      errorAlert.setAttribute('role', 'alert');
+      errorAlert.innerHTML = `
+        Error deleting picture: ${error.message}
+        <button type="button" class="alert-close" aria-label="Close" tabindex="0">×</button>
+      `;
+      
+      const mainContainer = document.querySelector('main.container');
+      if (mainContainer) {
+        mainContainer.insertBefore(errorAlert, mainContainer.firstChild);
+        
+        // Initialize alert close button
+        const alertCloseButton = errorAlert.querySelector('.alert-close');
+        if (alertCloseButton) {
+          alertCloseButton.addEventListener('click', function() {
+            const alert = this.closest('.alert');
+            if (alert) {
+              alert.style.opacity = '0';
+              setTimeout(() => {
+                alert.style.display = 'none';
+              }, 300);
+            }
+          });
+        }
       }
     });
 };
