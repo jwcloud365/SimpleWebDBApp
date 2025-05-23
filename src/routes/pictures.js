@@ -24,10 +24,9 @@ router.post('/', upload.single('picture'), validatePicture, async (req, res, nex
     // Get the uploaded file details
     const { filename, originalname, mimetype, size } = req.file;
     const { description } = req.body;
-    
-    // Generate a thumbnail
+      // Generate a thumbnail
     const thumbnail = await generateThumbnail(
-      path.join(__dirname, '../../public/uploads', filename)
+      req.file.path
     );
     
     // Create the picture record in the database

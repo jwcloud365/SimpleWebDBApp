@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const sharp = require('sharp');
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '..', 'public', 'uploads');
+const uploadsDir = path.join(__dirname, '../../public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
