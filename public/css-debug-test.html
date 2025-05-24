@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Debugging Test</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>CSS Debugging Test</h1>
+    
+    <div class="detail-actions">
+        <button class="btn btn-secondary edit-btn" id="editBtn" aria-label="Edit picture details" tabindex="0">
+            Edit
+        </button>
+        <button class="btn btn-danger" id="deleteBtn" data-id="48" aria-label="Delete this picture" tabindex="0">
+            Delete
+        </button>
+    </div>
+    
+    <div id="output"></div>
+    
+    <style>
+        /* Override to make sure buttons are clickable */
+        .btn {
+            pointer-events: auto !important;
+            z-index: 1000 !important;
+            position: relative !important;
+        }
+    </style>
+    
+    <script>
+        console.log("🚀 CSS Debug test loading...");
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ DOM loaded");
+            
+            const editBtn = document.getElementById('editBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const output = document.getElementById('output');
+            
+            console.log("🔍 Edit button found:", editBtn);
+            console.log("🔍 Delete button found:", deleteBtn);
+            
+            // Check computed styles
+            if (editBtn) {
+                const styles = window.getComputedStyle(editBtn);
+                console.log("🎨 Edit button styles:", {
+                    display: styles.display,
+                    pointerEvents: styles.pointerEvents,
+                    zIndex: styles.zIndex,
+                    position: styles.position,
+                    visibility: styles.visibility,
+                    opacity: styles.opacity
+                });
+                
+                editBtn.addEventListener('click', function() {
+                    console.log("🎯 Edit button clicked!");
+                    output.innerHTML += "<p>Edit button clicked!</p>";
+                });
+            }
+            
+            if (deleteBtn) {
+                const styles = window.getComputedStyle(deleteBtn);
+                console.log("🎨 Delete button styles:", {
+                    display: styles.display,
+                    pointerEvents: styles.pointerEvents,
+                    zIndex: styles.zIndex,
+                    position: styles.position,
+                    visibility: styles.visibility,
+                    opacity: styles.opacity
+                });
+                
+                deleteBtn.addEventListener('click', function() {
+                    console.log("🎯 Delete button clicked!");
+                    output.innerHTML += "<p>Delete button clicked!</p>";
+                });
+            }
+        });
+    </script>
+</body>
+</html>

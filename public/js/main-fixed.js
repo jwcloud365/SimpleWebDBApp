@@ -2,6 +2,32 @@
  * Optimized Main JavaScript for the Simple Picture Database
  * This version has performance improvements and reliability fixes
  */
+
+// Simple logger for debugging
+const logger = {
+  log: (message, data = null) => {
+    if (data) {
+      console.log(`[Gallery][${new Date().toISOString()}] ${message}`, data);
+    } else {
+      console.log(`[Gallery][${new Date().toISOString()}] ${message}`);
+    }
+  },
+  error: (message, error = null) => {
+    if (error) {
+      console.error(`[Gallery][${new Date().toISOString()}] ERROR: ${message}`, error);
+    } else {
+      console.error(`[Gallery][${new Date().toISOString()}] ERROR: ${message}`);
+    }
+  },
+  warn: (message, data = null) => {
+    if (data) {
+      console.warn(`[Gallery][${new Date().toISOString()}] WARN: ${message}`, data);
+    } else {
+      console.warn(`[Gallery][${new Date().toISOString()}] WARN: ${message}`);
+    }
+  }
+};
+
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Main script initialized');
@@ -110,6 +136,7 @@ const initGallery = () => {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         pictureIdToDelete = button.dataset.id;
+        logger.log('Gallery delete button clicked for picture ID:', pictureIdToDelete);
         openModal(deleteModal);
       });
     });
@@ -181,7 +208,12 @@ const closeModal = (modal) => {
  * @param {string|number} id - The ID of the picture to delete
  */
 const deletePicture = (id) => {
-  if (!id) return;
+  if (!id) {
+    console.error('No picture ID provided for deletion');
+    return;
+  }
+  
+  console.log('Starting delete process for picture ID:', id);
   
   // Show that we're processing
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');

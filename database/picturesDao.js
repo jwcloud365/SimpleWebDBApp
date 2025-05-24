@@ -221,13 +221,12 @@ class PicturesDAO {
    * Delete a picture and its associated thumbnails
    * @param {number} id - The picture ID
    * @returns {Promise<boolean>} - True if deleted, false if not found
-   */
-  async delete(id) {
+   */  async delete(id) {
     try {
       logger.log(`Starting deletion of picture ${id}`);
       
       // Use a transaction to ensure both database and files are deleted
-      return await transaction(async (txn) => {
+      const result = await transaction(async (txn) => {
         // Get full picture details before deletion for better logging
         const picture = await txn.get(
           'SELECT id, filename, original_filename, mimetype, size FROM pictures WHERE id = ?',
@@ -249,19 +248,19 @@ class PicturesDAO {
         logger.log(`Found ${thumbnails.length} thumbnails for picture ${id}`, thumbnails);
         
         // Delete from database (thumbnails will be deleted via foreign key cascade)
-        const result = await txn.run(
+        const dbResult = await txn.run(
           'DELETE FROM pictures WHERE id = ?',
           [id]
         );
         
-        if (result.changes === 0) {
+        if (dbResult.changes === 0) {
           logger.error(`Failed to delete picture ${id} from database - no rows affected`);
           return false;
         }
         
         logger.log(`Picture ${id} deleted from database successfully`, { 
-          changes: result.changes,
-          lastID: result.lastID 
+          changes: dbResult.changes,
+          lastID: dbResult.lastID 
         });
         
         // Delete the actual files (in a real app, these operations would be made more robust)
@@ -318,9 +317,10 @@ class PicturesDAO {
           deletedThumbnails,
           failedThumbnails
         });
-        
-        return true;
+          return true;
       });
+      
+      return result;
     } catch (error) {
       logger.error(`Error deleting picture ${id}:`, error);
       throw error;

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test - Minimal</title>
+    <style>
+        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .btn-danger { background: red; color: white; }
+        .btn-secondary { background: gray; color: white; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <h1>Button Test Page</h1>
+    
+    <button class="btn btn-secondary" id="editBtn">Edit</button>
+    <button class="btn btn-danger" id="deleteBtn" data-id="48">Delete</button>
+    
+    <div id="results">
+        <p>Click the buttons to test functionality</p>
+    </div>
+    
+    <script>
+        console.log('🚀 Test page script loading...');
+        
+        // Test immediately
+        const deleteBtn = document.getElementById('deleteBtn');
+        const editBtn = document.getElementById('editBtn');
+        const results = document.getElementById('results');
+        
+        console.log('Buttons found:', { deleteBtn: !!deleteBtn, editBtn: !!editBtn });
+        
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                console.log('✅ DELETE BUTTON WORKS!');
+                results.innerHTML += '<br>✅ Delete button clicked!';
+            });
+        }
+        
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                console.log('✅ EDIT BUTTON WORKS!');
+                results.innerHTML += '<br>✅ Edit button clicked!';
+            });
+        }
+        
+        console.log('✅ Event listeners added');
+    </script>
+</body>
+</html>

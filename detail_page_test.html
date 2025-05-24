@@ -1,7 +1,37 @@
-<%- include('./partials/header', { title: picture ? `Picture: ${picture.original_filename}` : 'Picture Details', mainClass: 'detail-page' }) %>
-    <%- include('./partials/messages') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picture: DSC04126.jpg</title>
+    <link rel="stylesheet" href="/css/styles.css">
     
-    <% if (picture) { %>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Simple Picture Database</h1>
+            <nav>
+                <ul>
+                    <li><a href="/" aria-label="Home" tabindex="0">Home</a></li>
+                    <li><a href="/upload" aria-label="Upload Pictures" tabindex="0">Upload</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container detail-page">
+
+    
+
+
+
+
+
+
+
+    
+    
         <section class="picture-detail">
             <div class="detail-header">
                 <h2>Picture Details</h2>
@@ -9,58 +39,56 @@
                     <button class="btn btn-secondary edit-btn" id="editBtn" aria-label="Edit picture details" tabindex="0">
                         Edit
                     </button>
-                    <button class="btn btn-danger" id="deleteBtn" data-id="<%= picture.id %>" aria-label="Delete this picture" tabindex="0">
+                    <button class="btn btn-danger" id="deleteBtn" data-id="48" aria-label="Delete this picture" tabindex="0">
                         Delete
                     </button>
                 </div>
             </div>              <div class="detail-content">
                 <div class="picture-container">
-                    <img src="/uploads/<%= picture.filename %>" alt="<%= picture.description || picture.original_filename %>" class="detail-image" onerror="this.src='/images/no-image.svg'">
+                    <img src="/uploads/picture-1748103959758-5da1dcb1747416ec.jpg" alt="fdfdfdfd" class="detail-image" onerror="this.src='/images/no-image.svg'">
                     
-                    <% if (picture.thumbnails && picture.thumbnails.length > 0) { %>
+                    
                         <div class="thumbnails-container">
                             <h4>Thumbnails</h4>
                             <div class="thumbnails-list">
-                                <% picture.thumbnails.forEach(function(thumb) { %>
+                                
                                     <div class="thumbnail-item">
-                                        <img src="/uploads/<%= thumb.filename %>" alt="Thumbnail" class="thumbnail-image" onerror="this.src='/uploads/<%= picture.filename %>'">
-                                        <span class="thumbnail-info"><%= thumb.width %>x<%= thumb.height %></span>
+                                        <img src="/uploads/thumb-picture-1748103959758-5da1dcb1747416ec.jpg" alt="Thumbnail" class="thumbnail-image" onerror="this.src='/uploads/picture-1748103959758-5da1dcb1747416ec.jpg'">
+                                        <span class="thumbnail-info">200x133</span>
                                     </div>
-                                <% }); %>
+                                
                             </div>
                         </div>
-                    <% } %>
+                    
                 </div>
                 
                 <div class="picture-info">
                     <div class="info-group">
                         <h3>File Information</h3>
                         <ul class="info-list">
-                            <li><strong>Original Name:</strong> <%= picture.original_filename %></li>
-                            <li><strong>File Size:</strong> <%= (picture.size / 1024).toFixed(2) %> KB</li>
-                            <li><strong>Type:</strong> <%= picture.mimetype %></li>
-                            <li><strong>Uploaded:</strong> <%= new Date(picture.created_at).toLocaleString() %></li>
-                            <% if (picture.updated_at) { %>
-                                <li><strong>Last Updated:</strong> <%= new Date(picture.updated_at).toLocaleString() %></li>
-                            <% } %>
+                            <li><strong>Original Name:</strong> DSC04126.jpg</li>
+                            <li><strong>File Size:</strong> 414.67 KB</li>
+                            <li><strong>Type:</strong> image/jpeg</li>
+                            <li><strong>Uploaded:</strong> 24-5-2025, 16:25:59</li>
+                            
+                                <li><strong>Last Updated:</strong> 24-5-2025, 16:25:59</li>
+                            
                         </ul>
                     </div>
                     
                     <div class="info-group">
                         <h3>Description</h3>
                         <div class="description-display" id="descriptionDisplay">
-                            <% if (picture.description) { %>
-                                <p><%= picture.description %></p>
-                            <% } else { %>
-                                <p class="no-description">No description provided</p>
-                            <% } %>
+                            
+                                <p>fdfdfdfd</p>
+                            
                         </div>
                         
                         <div class="edit-form hidden" id="editForm">
                             <form id="updateForm">
                                 <div class="form-group">
                                     <label for="editDescription" class="form-label">Edit Description</label>
-                                    <textarea id="editDescription" class="form-control" rows="4"><%= picture.description || '' %></textarea>
+                                    <textarea id="editDescription" class="form-control" rows="4">fdfdfdfd</textarea>
                                 </div>
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary save-btn">Save Changes</button>
@@ -89,12 +117,20 @@
                 </div>
             </div>
         </div>
-    <% } else { %>
-        <div class="not-found">
-            <h2>Picture Not Found</h2>
-            <p>The requested picture could not be found.</p>
-            <a href="/" class="btn btn-primary">Return to Gallery</a>
-        </div>
-    <% } %>
+    
 
-<%- include('./partials/footer', { scripts: ['/js/detail-clean.js'] }) %>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Simple Picture Database</p>
+        </div>
+    </footer>    <script src="/js/main-fixed.js"></script>
+    
+        
+            <script src="/js/detail-clean.js"></script>
+        
+    
+</body>
+</html>
+

@@ -230,18 +230,16 @@ router.delete('/:id', async (req, res, next) => {
       logger.error(`Picture not found for deletion: ${id}`);
       return res.status(404).json({ error: 'Picture not found' });
     }
-    
-    logger.log(`Found picture to delete`, {
+      logger.log(`Found picture to delete`, {
       id: picture.id,
       filename: picture.filename,
       mimetype: picture.mimetype,
       size: picture.size
-    });
-    
+    });    logger.log(`About to call picturesDao.delete(${id})`);
     const deleted = await picturesDao.delete(id);
     
     if (!deleted) {
-      logger.error(`Failed to delete picture ${id}`);
+      logger.error(`Failed to delete picture ${id} - delete method returned:`, deleted);
       return res.status(500).json({ error: 'Failed to delete picture' });
     }
     

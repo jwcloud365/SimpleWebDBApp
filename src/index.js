@@ -35,8 +35,18 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), {
+  setHeaders: (res, path) => {
+    console.log(`Serving static file: ${path}`);
+  }
+}));
 
 // Explicitly serve the uploads directory for images with appropriate headers
 app.use('/uploads', (req, res, next) => {

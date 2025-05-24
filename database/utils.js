@@ -110,17 +110,16 @@ function transaction(callback) {
             });
           }
         };
-        
-        // Execute the callback with the transaction object
+          // Execute the callback with the transaction object
         callback(txn)
-          .then(() => {
+          .then((result) => {
             db.run('COMMIT', (err) => {
               if (err) {
                 console.error('Error committing transaction:', err.message);
                 reject(err);
                 return;
               }
-              resolve();
+              resolve(result);
             });
           })
           .catch((err) => {

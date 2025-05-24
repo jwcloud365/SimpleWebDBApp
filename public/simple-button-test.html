@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <style>
+        .btn {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Button Functionality Test</h1>
+    
+    <div class="detail-actions">
+        <button class="btn btn-secondary edit-btn" id="editBtn" aria-label="Edit picture details" tabindex="0">
+            Edit
+        </button>
+        <button class="btn btn-danger" id="deleteBtn" data-id="48" aria-label="Delete this picture" tabindex="0">
+            Delete
+        </button>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script>
+        console.log("🚀 Script loading...");
+        
+        // Test basic click events
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ DOM loaded");
+            
+            const editBtn = document.getElementById('editBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const output = document.getElementById('output');
+            
+            console.log("🔍 Edit button found:", editBtn);
+            console.log("🔍 Delete button found:", deleteBtn);
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    console.log("🎯 Edit button clicked!");
+                    output.innerHTML += "<p>Edit button clicked!</p>";
+                });
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    console.log("🎯 Delete button clicked!");
+                    output.innerHTML += "<p>Delete button clicked!</p>";
+                });
+            }
+        });
+    </script>
+</body>
+</html>

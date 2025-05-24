@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Test</title>
+</head>
+<body>
+    <button id="deleteBtn" data-id="48">Delete</button>
+    <button id="editBtn">Edit</button>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded for test');
+            
+            const deleteBtn = document.getElementById('deleteBtn');
+            const editBtn = document.getElementById('editBtn');
+            
+            console.log('Delete button found:', deleteBtn);
+            console.log('Edit button found:', editBtn);
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    console.log('Delete button clicked!');
+                    alert('Delete button works!');
+                });
+            }
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    console.log('Edit button clicked!');
+                    alert('Edit button works!');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
